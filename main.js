@@ -4,7 +4,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x000000, 5, 20); // Add fog for atmospheric effect
+scene.fog = new THREE.Fog(0x000000, 5, 20); // Add fog for atmosphere
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -80,6 +80,39 @@ for (let i = 0; i < 15; i++) {
   scene.add(tombstone);
 }
 
+// Bushes
+const bushGeometry = new THREE.SphereGeometry(0.7, 16, 16);
+const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x006400 });
+const bushes = [];
+const bushPositions = [
+  { x: 2.5, y: 0.5, z: 1.5 },
+  { x: -2.5, y: 0.5, z: 1.5 },
+  { x: 1.5, y: 0.5, z: -2 },
+  { x: -1.5, y: 0.5, z: -2 },
+];
+bushPositions.forEach((pos) => {
+  const bush = new THREE.Mesh(bushGeometry, bushMaterial);
+  bush.position.set(pos.x, pos.y, pos.z);
+  scene.add(bush);
+  bushes.push(bush);
+});
+
+// Bouncing Lights
+const bouncingLights = [];
+const lightGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+const lightMaterial = new THREE.MeshStandardMaterial({ emissive: 0xffffff });
+for (let i = 0; i < 5; i++) {
+  const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial.clone());
+  lightMesh.material.emissive = new THREE.Color(Math.random(), Math.random(), Math.random());
+  lightMesh.position.set(
+    (Math.random() - 0.5) * 10,
+    Math.random() * 5 + 1,
+    (Math.random() - 0.5) * 10
+  );
+  scene.add(lightMesh);
+  bouncingLights.push({ mesh: lightMesh, velocity: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5) });
+}
+
 // GUI Controls for Lights
 const gui = new GUI();
 const redFolder = gui.addFolder('Red Light');
@@ -88,21 +121,20 @@ redFolder.add(redLight.position, 'x', -10, 10, 0.1);
 redFolder.add(redLight.position, 'y', -10, 10, 0.1);
 redFolder.add(redLight.position, 'z', -10, 10, 0.1);
 
-const greenFolder = gui.addFolder('Green Light');
-greenFolder.add(greenLight, 'intensity', 0, 2, 0.01);
-greenFolder.add(greenLight.position, 'x', -10, 10, 0.1);
-greenFolder.add(greenLight.position, 'y', -10, 10, 0.1);
-greenFolder.add(greenLight.position, 'z', -10, 10, 0.1);
-
-const orangeFolder = gui.addFolder('Orange Light');
-orangeFolder.add(orangeLight, 'intensity', 0, 2, 0.01);
-orangeFolder.add(orangeLight.position, 'x', -10, 10, 0.1);
-orangeFolder.add(orangeLight.position, 'y', -10, 10, 0.1);
-orangeFolder.add(orangeLight.position, 'z', -10, 10, 0.1);
-
 // Animation
 const animate = () => {
   requestAnimationFrame(animate);
+
+  // Update bouncing lights
+  bouncingLights.forEach((light) => {
+    light.mesh.position.add(light.velocity);
+
+    // Reverse direction if hitting bounds
+    if (light.mesh.position.x > 10 || light.mesh.position.x < -10) light.velocity.x *= -1;
+    if (light.mesh.position.y > 6 || light.mesh.position.y < 1) light.velocity.y *= -1;
+    if (light.mesh.position.z > 10 || light.mesh.position.z < -10) light.velocity.z *= -1;
+  });
+
   controls.update();
   renderer.render(scene, camera);
 };
@@ -114,4 +146,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
