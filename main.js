@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import GUI from "lil-gui"; // GUI for controls
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -23,14 +22,6 @@ controls.enableDamping = true;
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xaaaaaa, 0.5);
 scene.add(ambientLight);
-
-// Ground / Floor
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(20, 20),
-  new THREE.MeshStandardMaterial({ color: 0x228b22 })
-);
-ground.rotation.x = -Math.PI / 2; // Rotate the plane to be horizontal
-scene.add(ground);
 
 // House
 const house = new THREE.Group();
@@ -61,20 +52,22 @@ const door = new THREE.Mesh(
 door.position.set(0, 0.75, 2.01);
 house.add(door);
 
-// Tombstones (50 total)
+// Tombstones
 const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x4b4b4b });
-for (let i = 0; i < 50; i++) {
+const tombstones = [];
+for (let i = 0; i < 10; i++) {
   const tombstone = new THREE.Mesh(
     new THREE.BoxGeometry(0.6, 0.8, 0.2),
     tombstoneMaterial
   );
   tombstone.position.set(
-    (Math.random() - 0.5) * 16, // Spread tombstones further from the house
+    (Math.random() - 0.5) * 8,
     0.4,
-    (Math.random() - 0.5) * 16
+    (Math.random() - 0.5) * 8
   );
   tombstone.rotation.y = (Math.random() - 0.5) * Math.PI * 0.2;
   scene.add(tombstone);
+  tombstones.push(tombstone);
 }
 
 // Bushes
@@ -96,15 +89,6 @@ bushPositions.forEach((pos) => {
   scene.add(bush);
   bushes.push(bush);
 });
-
-// Static Lights for Controls
-const staticLights = [];
-for (let i = 0; i < 3; i++) {
-  const staticLight = new THREE.PointLight(0xffffff, 1, 10);
-  staticLight.position.set((i - 1) * 5, 3, 0); // Spread lights horizontally
-  scene.add(staticLight);
-  staticLights.push(staticLight);
-}
 
 // Bouncing Lights
 const bouncingLights = [];
@@ -138,35 +122,6 @@ for (let i = 0; i < 5; i++) {
   });
 }
 
-// GUI Controls
-const gui = new GUI();
-const lightFolder = gui.addFolder("Bouncing Lights");
-lightFolder.open();
-
-bouncingLights.forEach((light, index) => {
-  const color = { color: `#${light.mesh.material.emissive.getHexString()}` };
-  const folder = lightFolder.addFolder(`Light ${index + 1}`);
-  folder
-    .addColor(color, "color")
-    .onChange((value) => light.mesh.material.emissive.set(value));
-  folder.add(light.mesh.position, "x", -10, 10, 0.1).name("Position X");
-  folder.add(light.mesh.position, "y", 1, 6, 0.1).name("Position Y");
-  folder.add(light.mesh.position, "z", -10, 10, 0.1).name("Position Z");
-  folder.open();
-});
-
-// Static Light Controls
-const staticLightFolder = gui.addFolder("Static Lights");
-staticLights.forEach((light, index) => {
-  const folder = staticLightFolder.addFolder(`Static Light ${index + 1}`);
-  folder.add(light.position, "x", -10, 10, 0.1).name("Position X");
-  folder.add(light.position, "y", 0, 10, 0.1).name("Position Y");
-  folder.add(light.position, "z", -10, 10, 0.1).name("Position Z");
-  folder.add(light, "intensity", 0, 5, 0.1).name("Intensity");
-  folder.open();
-});
-staticLightFolder.open();
-
 // Animation
 const animate = () => {
   requestAnimationFrame(animate);
@@ -196,5 +151,6 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 
 
