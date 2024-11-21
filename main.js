@@ -4,6 +4,8 @@ import GUI from "lil-gui"; // GUI for controls
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x111111, 5, 25); // Add fog with dark gray color
+
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -24,10 +26,17 @@ controls.enableDamping = true;
 const ambientLight = new THREE.AmbientLight(0xaaaaaa, 0.5);
 scene.add(ambientLight);
 
-// Ground / Floor
+// Grass Floor with Texture
+const grassTexture = new THREE.TextureLoader().load(
+  "https://threejsfundamentals.org/threejs/resources/images/grass.jpg"
+);
+grassTexture.wrapS = THREE.RepeatWrapping;
+grassTexture.wrapT = THREE.RepeatWrapping;
+grassTexture.repeat.set(20, 20);
+
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(20, 20),
-  new THREE.MeshStandardMaterial({ color: 0x228b22 })
+  new THREE.MeshStandardMaterial({ map: grassTexture })
 );
 ground.rotation.x = -Math.PI / 2; // Rotate the plane to be horizontal
 scene.add(ground);
@@ -196,4 +205,5 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 
