@@ -1,156 +1,114 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'dat.gui';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
-// Scene setup
+// Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x111111, 0.02); // Fog for mystic effect
+scene.fog = new THREE.Fog(0x000000, 5, 20); // Add fog for atmospheric effect
 
-// Camera setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(10, 8, 20);
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(4, 5, 10);
 
-// Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x111111); // Matches fog for seamless effect
 document.body.appendChild(renderer.domElement);
 
-// OrbitControls
+// Add OrbitControls for zooming and orbiting
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.dampingFactor = 0.1;
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 scene.add(ambientLight);
 
-// Directional light (for general scene illumination)
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10);
-scene.add(directionalLight);
+const redLight = new THREE.PointLight(0xff0000, 0.8, 10);
+redLight.position.set(4, 5, -2);
+scene.add(redLight);
 
-// House
-const house = new THREE.Group();
+const greenLight = new THREE.PointLight(0x00ff00, 0.6, 10);
+greenLight.position.set(-4, 1, 0);
+scene.add(greenLight);
 
-// Walls
-const walls = new THREE.Mesh(
-  new THREE.BoxGeometry(4, 3, 4),
-  new THREE.MeshStandardMaterial({ color: 0x8B4513 })
-);
-walls.position.y = 1.5;
-house.add(walls);
+const orangeLight = new THREE.PointLight(0xffa500, 0.7, 10);
+orangeLight.position.set(0, 2, -5);
+scene.add(orangeLight);
 
-// Roof
-const roof = new THREE.Mesh(
-  new THREE.ConeGeometry(3.5, 2, 4),
-  new THREE.MeshStandardMaterial({ color: 0x663300 })
-);
-roof.position.y = 4;
-roof.rotation.y = Math.PI / 4;
-house.add(roof);
-
-// Door
-const door = new THREE.Mesh(
-  new THREE.PlaneGeometry(1, 2),
-  new THREE.MeshStandardMaterial({ color: 0x4B3621 })
-);
-door.position.set(0, 1, 2.01);
-house.add(door);
-
-// Add house to scene
-scene.add(house);
-
-// Garden (ground)
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x228B22 })
-);
+// Ground
+const groundGeometry = new THREE.PlaneGeometry(30, 30);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI / 2;
-ground.position.y = 0;
 scene.add(ground);
 
-// Bushes
-const bushGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x006400 });
+// House
+const houseBodyGeometry = new THREE.BoxGeometry(4, 4, 4);
+const houseBodyMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+const houseBody = new THREE.Mesh(houseBodyGeometry, houseBodyMaterial);
+houseBody.position.y = 2;
+scene.add(houseBody);
 
-const bushes = [];
-for (let i = 0; i < 10; i++) {
-  const bush = new THREE.Mesh(bushGeometry, bushMaterial);
-  bush.position.set(
-    (Math.random() - 0.5) * 20, // Random positions in the garden
-    0.3,
-    (Math.random() - 0.5) * 20
+const roofGeometry = new THREE.ConeGeometry(3, 2, 4);
+const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x8b0000 });
+const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+roof.position.y = 5;
+roof.rotation.y = Math.PI / 4;
+scene.add(roof);
+
+const doorGeometry = new THREE.BoxGeometry(1, 2, 0.1);
+const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
+const door = new THREE.Mesh(doorGeometry, doorMaterial);
+door.position.set(0, 1, 2.05);
+scene.add(door);
+
+// Tombstones
+const tombstoneGeometry = new THREE.BoxGeometry(0.5, 1, 0.1);
+const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+for (let i = 0; i < 15; i++) {
+  const tombstone = new THREE.Mesh(tombstoneGeometry, tombstoneMaterial);
+  tombstone.position.set(
+    (Math.random() - 0.5) * 10,
+    0.5,
+    (Math.random() - 0.5) * 10
   );
-  scene.add(bush);
-  bushes.push(bush);
+  tombstone.rotation.y = Math.random() * Math.PI;
+  scene.add(tombstone);
 }
 
-// Trees
-const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.3, 2, 16);
-const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+// GUI Controls for Lights
+const gui = new GUI();
+const redFolder = gui.addFolder('Red Light');
+redFolder.add(redLight, 'intensity', 0, 2, 0.01);
+redFolder.add(redLight.position, 'x', -10, 10, 0.1);
+redFolder.add(redLight.position, 'y', -10, 10, 0.1);
+redFolder.add(redLight.position, 'z', -10, 10, 0.1);
 
-const foliageGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x006400 });
+const greenFolder = gui.addFolder('Green Light');
+greenFolder.add(greenLight, 'intensity', 0, 2, 0.01);
+greenFolder.add(greenLight.position, 'x', -10, 10, 0.1);
+greenFolder.add(greenLight.position, 'y', -10, 10, 0.1);
+greenFolder.add(greenLight.position, 'z', -10, 10, 0.1);
 
-for (let i = 0; i < 5; i++) {
-  const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-  const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+const orangeFolder = gui.addFolder('Orange Light');
+orangeFolder.add(orangeLight, 'intensity', 0, 2, 0.01);
+orangeFolder.add(orangeLight.position, 'x', -10, 10, 0.1);
+orangeFolder.add(orangeLight.position, 'y', -10, 10, 0.1);
+orangeFolder.add(orangeLight.position, 'z', -10, 10, 0.1);
 
-  trunk.position.set((Math.random() - 0.5) * 20, 1, (Math.random() - 0.5) * 20);
-  foliage.position.set(trunk.position.x, trunk.position.y + 2, trunk.position.z);
-
-  scene.add(trunk);
-  scene.add(foliage);
-}
-
-// Bouncing lights
-const lights = [];
-for (let i = 0; i < 10; i++) {
-  const lightColor = new THREE.Color(Math.random(), Math.random(), Math.random());
-  const pointLight = new THREE.PointLight(lightColor, 1, 10);
-  pointLight.position.set(
-    (Math.random() - 0.5) * 30,
-    Math.random() * 5 + 1,
-    (Math.random() - 0.5) * 30
-  );
-
-  const lightSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.1, 8, 8),
-    new THREE.MeshBasicMaterial({ color: lightColor })
-  );
-  pointLight.add(lightSphere);
-  scene.add(pointLight);
-
-  lights.push({
-    light: pointLight,
-    velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.2,
-      (Math.random() - 0.5) * 0.2,
-      (Math.random() - 0.5) * 0.2
-    ),
-  });
-}
-
-// Animation loop
+// Animation
 const animate = () => {
   requestAnimationFrame(animate);
-
-  // Move lights
-  lights.forEach((bouncingLight) => {
-    bouncingLight.light.position.add(bouncingLight.velocity);
-
-    // Reverse direction if out of bounds
-    if (bouncingLight.light.position.x < -25 || bouncingLight.light.position.x > 25) bouncingLight.velocity.x *= -1;
-    if (bouncingLight.light.position.y < 1 || bouncingLight.light.position.y > 10) bouncingLight.velocity.y *= -1;
-    if (bouncingLight.light.position.z < -25 || bouncingLight.light.position.z > 25) bouncingLight.velocity.z *= -1;
-  });
-
   controls.update();
   renderer.render(scene, camera);
 };
 animate();
 
-// Handle resizing
+// Handle window resizing
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
