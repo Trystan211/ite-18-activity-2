@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GUI } from "dat.gui";
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -126,21 +125,6 @@ bushes.forEach(([x, y, z]) => {
 
 scene.add(house);
 
-// GUI Controls for static lights
-const gui = new GUI();
-staticLights.forEach((light, idx) => {
-  const folder = gui.addFolder(`Static Light ${idx + 1}`);
-  folder.addColor(light, "color").onChange((value) => {
-    const color = new THREE.Color(value);
-    scene.children.find(
-      (obj) =>
-        obj instanceof THREE.PointLight &&
-        obj.color.getHexString() === color.getHexString()
-    ).color.set(value);
-  });
-  folder.open();
-});
-
 // Animation
 const clock = new THREE.Clock();
 const animate = () => {
@@ -167,5 +151,4 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 
