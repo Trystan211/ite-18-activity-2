@@ -19,26 +19,26 @@ document.body.appendChild(renderer.domElement);
 // Add green grass-like floor
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x00aa00 })
+  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Darker grass for nighttime
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true; // Ground receives shadows
 scene.add(ground);
 
-// Adjusted Fog
-scene.fog = new THREE.Fog(0x000000, 10, 50); // Adjusted fog start and end values
+// Adjusted Fog for Nighttime
+scene.fog = new THREE.Fog(0x000011, 10, 50); // Dark blue fog for a nighttime atmosphere
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased intensity
+// Lighting (Nighttime Adjustments)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Reduced intensity for night
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3); // Softer directional light
 directionalLight.position.set(10, 15, 10);
 directionalLight.castShadow = true; // Enable shadows
 scene.add(directionalLight);
 
 // Add tombstones
-const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x333333 }); // Added emissive
+const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x111111 }); // Dim emissive glow for night
 const placedPositions = [];
 for (let i = 0; i < 50; i++) {
   let x, z, distance;
@@ -59,11 +59,11 @@ for (let i = 0; i < 50; i++) {
   scene.add(tombstone);
 }
 
-// Bouncing Lights
+// Bouncing Lights (Glowing Lights for Night)
 const bouncingLights = [];
 for (let i = 0; i < 5; i++) {
   const lightColor = new THREE.Color(Math.random(), Math.random(), Math.random());
-  const bouncingLight = new THREE.PointLight(lightColor, 1.5, 15); // Increased intensity and range
+  const bouncingLight = new THREE.PointLight(lightColor, 3, 20); // Increased intensity and range
   bouncingLight.position.set(
     Math.random() * 10 - 5,
     Math.random() * 5 + 2,
@@ -87,18 +87,18 @@ const house = new THREE.Group();
 // Walls
 const walls = new THREE.Mesh(
   new THREE.BoxGeometry(4, 3, 4),
-  new THREE.MeshStandardMaterial({ color: 0xb35f45 })
+  new THREE.MeshStandardMaterial({ color: 0x5a2f2f })
 );
 walls.position.y = 1.5;
 walls.castShadow = true;
 house.add(walls);
 
-// Roof
+// Roof (Adjusted Position)
 const roof = new THREE.Mesh(
   new THREE.ConeGeometry(3.5, 1, 4),
-  new THREE.MeshStandardMaterial({ color: 0x8b0000 })
+  new THREE.MeshStandardMaterial({ color: 0x4b0000 })
 );
-roof.position.y = 4;
+roof.position.y = 3.5; // Aligns the base of the roof with the top of the walls
 roof.rotation.y = Math.PI / 4;
 roof.castShadow = true;
 house.add(roof);
@@ -112,7 +112,7 @@ door.position.set(0, 1, 2.01);
 house.add(door);
 
 // Bushes
-const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x006600 });
 const bushGeometry = new THREE.SphereGeometry(0.5, 16, 16);
 const bushes = [
   [1.5, 0.3, 2.5],
