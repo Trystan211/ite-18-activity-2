@@ -11,6 +11,7 @@ camera.position.set(10, 10, 15);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // High-quality soft shadows
 document.body.appendChild(renderer.domElement);
 
 // Ground
@@ -26,9 +27,13 @@ scene.add(ground);
 scene.fog = new THREE.Fog(0x000022, 10, 50);
 
 // Moonlight
-const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); // Reset moonlight intensity
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.6); // Adjusted intensity
 moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
+moonLight.shadow.mapSize.width = 2048; // Enhanced shadow resolution
+moonLight.shadow.mapSize.height = 2048;
+moonLight.shadow.camera.near = 1;
+moonLight.shadow.camera.far = 50;
 scene.add(moonLight);
 
 // Ambient light
@@ -113,7 +118,7 @@ base.castShadow = true;
 
 const orb = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2 }) // Increased emissiveIntensity
+  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2.5 }) // Brighter emissive intensity
 );
 orb.position.y = 2;
 orb.castShadow = true;
@@ -141,7 +146,7 @@ const animate = () => {
   });
 
   // Animate shrine orb glow
-  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2; // Brighter base glow
+  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2.5; // Pulsing brighter glow
 
   controls.update();
   renderer.render(scene, camera);
@@ -156,5 +161,4 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 
