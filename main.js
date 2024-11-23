@@ -10,7 +10,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.set(5, 7, 10);
+camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -19,32 +19,24 @@ document.body.appendChild(renderer.domElement);
 // Add green grass-like floor
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x00aa00 }) // Plain green material
+  new THREE.MeshStandardMaterial({ color: 0x00aa00 })
 );
-ground.rotation.x = -Math.PI / 2; // Rotate the plane to be horizontal
+ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Add fog
-scene.fog = new THREE.Fog(0x000000, 10, 50);
+// Adjusted Fog
+scene.fog = new THREE.Fog(0x000000, 30, 100); // Start fog further and increase its range
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased intensity
 scene.add(ambientLight);
 
-const staticLights = [
-  { color: 0xff0000, position: [4, 5, -2] },
-  { color: 0x00ff00, position: [-4, 5, 2] },
-  { color: 0xffa500, position: [0, 5, -4] },
-];
-
-staticLights.forEach((light) => {
-  const pointLight = new THREE.PointLight(light.color, 1, 10);
-  pointLight.position.set(...light.position);
-  scene.add(pointLight);
-});
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(10, 15, 10);
+scene.add(directionalLight);
 
 // Add tombstones
-const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x333333 }); // Added emissive
 for (let i = 0; i < 50; i++) {
   const tombstone = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 1, 0.2),
@@ -52,10 +44,10 @@ for (let i = 0; i < 50; i++) {
   );
   tombstone.position.set(
     Math.random() * 20 - 10, // Random X position
-    0.5, // Above ground level
+    0.5,
     Math.random() * 20 - 10 // Random Z position
   );
-  tombstone.rotation.y = Math.random() * Math.PI; // Random rotation
+  tombstone.rotation.y = Math.random() * Math.PI;
   scene.add(tombstone);
 }
 
@@ -63,7 +55,7 @@ for (let i = 0; i < 50; i++) {
 const bouncingLights = [];
 for (let i = 0; i < 5; i++) {
   const lightColor = new THREE.Color(Math.random(), Math.random(), Math.random());
-  const bouncingLight = new THREE.PointLight(lightColor, 1, 5);
+  const bouncingLight = new THREE.PointLight(lightColor, 1.5, 15); // Increased intensity and range
   bouncingLight.position.set(
     Math.random() * 10 - 5,
     Math.random() * 5 + 2,
@@ -128,18 +120,6 @@ scene.add(house);
 
 // GUI Controls for static lights
 const gui = new GUI();
-staticLights.forEach((light, idx) => {
-  const folder = gui.addFolder(`Static Light ${idx + 1}`);
-  folder.addColor(light, "color").onChange((value) => {
-    const color = new THREE.Color(value);
-    scene.children.find(
-      (obj) =>
-        obj instanceof THREE.PointLight &&
-        obj.color.getHexString() === color.getHexString()
-    ).color.set(value);
-  });
-  folder.open();
-});
 
 // Animation
 const clock = new THREE.Clock();
@@ -149,7 +129,6 @@ const animate = () => {
   // Update bouncing lights
   bouncingLights.forEach(({ light, velocity }) => {
     light.position.add(velocity);
-    // Bounce off the ground and walls
     if (light.position.y < 0.5 || light.position.y > 5) velocity.y *= -1;
     if (light.position.x < -10 || light.position.x > 10) velocity.x *= -1;
     if (light.position.z < -10 || light.position.z > 10) velocity.z *= -1;
