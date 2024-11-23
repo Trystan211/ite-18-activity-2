@@ -84,8 +84,8 @@ for (let i = 0; i < 50; i++) {
 
 // Fireflies
 const fireflies = [];
-for (let i = 0; i < 20; i++) {
-  const firefly = new THREE.PointLight(0xffff00, 3, 7); // Increased intensity for brightness
+for (let i = 0; i < 15; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 2, 7); // Increased intensity for brightness
   firefly.position.set(
     Math.random() * 40 - 20,
     Math.random() * 5 + 1,
