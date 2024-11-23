@@ -3,164 +3,157 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/exampl
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000); // Black background for nighttime
+scene.background = new THREE.Color(0x000022); // Deep blue for nighttime
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true; // Enable shadows
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Add dark grass-like floor
+// Ground (dark forest floor)
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Dark green for nighttime
+  new THREE.MeshStandardMaterial({ color: 0x1a1a1a }) // Very dark brown
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Adjusted Fog for Spooky Night
-scene.fog = new THREE.Fog(0x111122, 5, 30); // Dark bluish-gray fog
+// Fog for mysterious atmosphere
+scene.fog = new THREE.Fog(0x000022, 10, 50);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05); // Very dim ambient light
-scene.add(ambientLight);
-
-const moonLight = new THREE.DirectionalLight(0x88aaff, 0.2); // Moonlight effect
-moonLight.position.set(10, 20, -10);
+// Moonlight filtering through trees
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.3);
+moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
 scene.add(moonLight);
 
-// Add tombstones
-const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x111111 });
-for (let i = 0; i < 50; i++) {
-  const tombstone = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5, 1, 0.2),
-    tombstoneMaterial
+// Ambient light for soft glow
+const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Soft, dim light
+scene.add(ambientLight);
+
+// Trees
+const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2b2b2b }); // Dark bark
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 }); // Dark green leaves
+
+for (let i = 0; i < 30; i++) {
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
+    treeMaterial
   );
-  tombstone.position.set(
-    Math.random() * 20 - 10,
-    0.5,
-    Math.random() * 20 - 10
+  trunk.position.set(Math.random() * 40 - 20, 3, Math.random() * 40 - 20);
+  trunk.castShadow = true;
+
+  const foliage = new THREE.Mesh(
+    new THREE.SphereGeometry(2, 16, 16),
+    leafMaterial
   );
-  tombstone.rotation.y = Math.random() * Math.PI;
-  tombstone.castShadow = true;
-  scene.add(tombstone);
+  foliage.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
+  foliage.castShadow = true;
+
+  scene.add(trunk);
+  scene.add(foliage);
 }
 
-// Spooky Bouncing Lights
-const bouncingLights = [];
-const eerieColors = [0x00ff88, 0xff2200, 0x2200ff];
-for (let i = 0; i < 5; i++) {
-  const lightColor = eerieColors[i % eerieColors.length];
-  const bouncingLight = new THREE.PointLight(lightColor, 2, 15); // Spooky glow
-  bouncingLight.position.set(
-    Math.random() * 10 - 5,
-    Math.random() * 5 + 2,
-    Math.random() * 10 - 5
+// Glowing mushrooms
+const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+for (let i = 0; i < 20; i++) {
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.2, 0.5),
+    mushroomStemMaterial
   );
-  bouncingLight.castShadow = true;
-  scene.add(bouncingLight);
-  bouncingLights.push({
-    light: bouncingLight,
+  const cap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.4, 0.3, 8),
+    mushroomCapMaterial
+  );
+  const x = Math.random() * 40 - 20;
+  const z = Math.random() * 40 - 20;
+  stem.position.set(x, 0.25, z);
+  cap.position.set(x, 0.55, z);
+
+  stem.castShadow = true;
+  cap.castShadow = true;
+
+  scene.add(stem);
+  scene.add(cap);
+}
+
+// Fireflies
+const fireflies = [];
+for (let i = 0; i < 15; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 1, 5);
+  firefly.position.set(
+    Math.random() * 20 - 10,
+    Math.random() * 5 + 1,
+    Math.random() * 20 - 10
+  );
+  scene.add(firefly);
+  fireflies.push({
+    light: firefly,
     velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02
     ),
   });
 }
 
-// House
-const house = new THREE.Group();
-
-// Walls
-const walls = new THREE.Mesh(
-  new THREE.BoxGeometry(4, 3, 4),
-  new THREE.MeshStandardMaterial({ color: 0x5a2f2f })
+// Magical Shrine
+const shrine = new THREE.Group();
+const base = new THREE.Mesh(
+  new THREE.BoxGeometry(3, 1, 3),
+  new THREE.MeshStandardMaterial({ color: 0x4b4b4b })
 );
-walls.position.y = 1.5;
-walls.castShadow = true;
-house.add(walls);
+base.position.y = 0.5;
+base.castShadow = true;
 
-// Roof (adjusted y-position)
-const roof = new THREE.Mesh(
-  new THREE.ConeGeometry(3.5, 1, 4),
-  new THREE.MeshStandardMaterial({ color: 0x4b0000 })
+const orb = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 16, 16),
+  new THREE.MeshStandardMaterial({ emissive: 0x00ff88 })
 );
-roof.position.y = 3.5 + 1.5; // Corrected roof position
-roof.rotation.y = Math.PI / 4;
-roof.castShadow = true;
-house.add(roof);
+orb.position.y = 2;
+orb.castShadow = true;
 
-// Door
-const door = new THREE.Mesh(
-  new THREE.PlaneGeometry(1.5, 2),
-  new THREE.MeshStandardMaterial({ color: 0x3c2f2f })
-);
-door.position.set(0, 1, 2.01);
-house.add(door);
-
-// Bushes
-const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 });
-const bushGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-const bushes = [
-  [1.5, 0.3, 2.5],
-  [2, 0.2, 1.8],
-  [-1.5, 0.3, 2.5],
-  [-2, 0.2, 1.8],
-];
-bushes.forEach(([x, y, z]) => {
-  const bush = new THREE.Mesh(bushGeometry, bushMaterial);
-  bush.scale.set(1, 1, 1);
-  bush.position.set(x, y, z);
-  bush.castShadow = true;
-  house.add(bush);
-});
-
-scene.add(house);
+shrine.add(base);
+shrine.add(orb);
+scene.add(shrine);
 
 // Camera Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Add some smoothing
+controls.enableDamping = true;
 controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
 
 // Animation
 const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update controls
-  controls.update(); // Update the controls
-
-  // Update bouncing lights
-  bouncingLights.forEach(({ light, velocity }) => {
+  // Update fireflies
+  fireflies.forEach(({ light, velocity }) => {
     light.position.add(velocity);
-    if (light.position.y < 0.5 || light.position.y > 5) velocity.y *= -1;
-    if (light.position.x < -10 || light.position.x > 10) velocity.x *= -1;
-    if (light.position.z < -10 || light.position.z > 10) velocity.z *= -1;
+    if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
+    if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
+    if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
   });
 
+  // Animate shrine orb glow
+  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.5 + 0.5;
+
+  controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
 
 animate();
 
-// Handle resizing
+// Handle window resize
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 
