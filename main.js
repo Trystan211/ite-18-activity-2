@@ -1,161 +1,145 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js";
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000022);
+scene.background = new THREE.Color(0x000000); // Dark background for nighttime
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
 camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // High-quality soft shadows
+renderer.shadowMap.enabled = true; // Enable shadows
 document.body.appendChild(renderer.domElement);
 
-// Ground
+// Add dark forest-like floor
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Dark green
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Fog
-scene.fog = new THREE.Fog(0x000022, 10, 50);
+// Fog for nighttime
+scene.fog = new THREE.Fog(0x111122, 5, 50);
 
-// Moonlight
+// Moonlight (Directional Light)
 const moonLight = new THREE.DirectionalLight(0x6666ff, 0.6); // Adjusted intensity
 moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
-moonLight.shadow.mapSize.width = 2048; // Enhanced shadow resolution
-moonLight.shadow.mapSize.height = 2048;
-moonLight.shadow.camera.near = 1;
-moonLight.shadow.camera.far = 50;
+
+// Expand the shadow area
+moonLight.shadow.mapSize.width = 4096; // Higher resolution for sharper shadows
+moonLight.shadow.mapSize.height = 4096;
+
+moonLight.shadow.camera.near = 1; // Start rendering shadows close to the light
+moonLight.shadow.camera.far = 100; // Render shadows farther away
+moonLight.shadow.camera.left = -50; // Extend the shadow area left
+moonLight.shadow.camera.right = 50; // Extend the shadow area right
+moonLight.shadow.camera.top = 50; // Extend the shadow area up
+moonLight.shadow.camera.bottom = -50; // Extend the shadow area down
+
 scene.add(moonLight);
 
-// Ambient light
-const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
-scene.add(ambientLight);
+// Helper to visualize shadow area (optional, remove when not needed)
+const shadowCameraHelper = new THREE.CameraHelper(moonLight.shadow.camera);
+scene.add(shadowCameraHelper);
 
-// Trees
-const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2b2b2b });
-const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 });
-
-for (let i = 0; i < 50; i++) {
-  const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
-    treeMaterial
-  );
-  trunk.position.set(Math.random() * 40 - 20, 3, Math.random() * 40 - 20);
-  trunk.castShadow = true;
-
-  const foliage = new THREE.Mesh(
-    new THREE.SphereGeometry(2, 16, 16),
-    leafMaterial
-  );
-  foliage.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
-  foliage.castShadow = true;
-
-  scene.add(trunk);
-  scene.add(foliage);
-}
-
-// Mushrooms
-const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
-const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-for (let i = 0; i < 50; i++) {
-  const stem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.1, 0.2, 0.5),
-    mushroomStemMaterial
-  );
-  const cap = new THREE.Mesh(
-    new THREE.ConeGeometry(0.4, 0.3, 8),
-    mushroomCapMaterial
-  );
-  const x = Math.random() * 40 - 20;
-  const z = Math.random() * 40 - 20;
-  stem.position.set(x, 0.25, z);
-  cap.position.set(x, 0.55, z);
-
-  stem.castShadow = true;
-  cap.castShadow = true;
-
-  scene.add(stem);
-  scene.add(cap);
-}
+// Glowing Orb
+const orbGeometry = new THREE.SphereGeometry(1, 32, 32);
+const orbMaterial = new THREE.MeshStandardMaterial({
+  emissive: 0xffff00, // Bright yellow glow
+  emissiveIntensity: 5,
+});
+const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+orb.position.set(0, 5, 0);
+orb.castShadow = true;
+scene.add(orb);
 
 // Fireflies
 const fireflies = [];
-for (let i = 0; i < 50; i++) {
-  const firefly = new THREE.PointLight(0xffff00, 2, 7);
-  firefly.position.set(
-    Math.random() * 40 - 20,
-    Math.random() * 5 + 1,
-    Math.random() * 40 - 20
+const fireflyMaterial = new THREE.PointsMaterial({
+  size: 0.2,
+  color: 0xffffaa,
+  transparent: true,
+  opacity: 0.8,
+});
+const fireflyGeometry = new THREE.BufferGeometry();
+const fireflyCount = 100; // Add more fireflies
+const positions = [];
+for (let i = 0; i < fireflyCount; i++) {
+  positions.push(
+    Math.random() * 20 - 10,
+    Math.random() * 10 + 1,
+    Math.random() * 20 - 10
   );
-  scene.add(firefly);
-  fireflies.push({
-    light: firefly,
-    velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.02,
-      (Math.random() - 0.5) * 0.02,
-      (Math.random() - 0.5) * 0.02
-    ),
-  });
 }
-
-// Shrine
-const shrine = new THREE.Group();
-const base = new THREE.Mesh(
-  new THREE.BoxGeometry(3, 1, 3),
-  new THREE.MeshStandardMaterial({ color: 0x4b4b4b })
+fireflyGeometry.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(positions, 3)
 );
-base.position.y = 0.5;
-base.castShadow = true;
+const fireflyPoints = new THREE.Points(fireflyGeometry, fireflyMaterial);
+scene.add(fireflyPoints);
 
-const orb = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2.5 }) // Brighter emissive intensity
-);
-orb.position.y = 2;
-orb.castShadow = true;
+// Mushrooms
+const mushroomMaterial = new THREE.MeshStandardMaterial({ color: 0xff2200 });
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+for (let i = 0; i < 20; i++) {
+  const mushroomCap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.5, 0.5, 16),
+    mushroomMaterial
+  );
+  const mushroomStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.1, 0.5, 16),
+    mushroomStemMaterial
+  );
 
-shrine.add(base);
-shrine.add(orb);
-scene.add(shrine);
+  const mushroom = new THREE.Group();
+  mushroomCap.position.y = 0.5;
+  mushroom.add(mushroomCap);
+  mushroom.add(mushroomStem);
+
+  mushroom.position.set(
+    Math.random() * 20 - 10,
+    0.1,
+    Math.random() * 20 - 10
+  );
+  mushroom.castShadow = true;
+  scene.add(mushroom);
+}
 
 // Camera Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+controls.enableDamping = true; // Add some smoothing
 controls.dampingFactor = 0.25;
 
-// Animation
+// Animation Loop
 const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update fireflies
-  fireflies.forEach(({ light, velocity }) => {
-    light.position.add(velocity);
-    if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
-    if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
-    if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
-  });
+  // Firefly movement
+  const positions = fireflyGeometry.attributes.position.array;
+  for (let i = 0; i < positions.length; i += 3) {
+    positions[i + 1] += Math.sin(elapsedTime + i) * 0.005; // Sway up and down
+  }
+  fireflyGeometry.attributes.position.needsUpdate = true;
 
-  // Animate shrine orb glow
-  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2.5; // Pulsing brighter glow
-
-  controls.update();
+  controls.update(); // Update controls
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
 
 animate();
 
-// Handle window resize
+// Handle window resizing
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
