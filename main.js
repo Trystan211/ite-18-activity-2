@@ -3,115 +3,159 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/exampl
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000); // Black background for nighttime
+scene.background = new THREE.Color(0x000022);
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true; // Enable shadows
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // High-quality soft shadows
 document.body.appendChild(renderer.domElement);
 
-// Add dark grass-like floor
+// Ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Dark green for nighttime
+  new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Adjusted Fog for Spooky Night
-scene.fog = new THREE.Fog(0x111122, 5, 30); // Dark bluish-gray fog
+// Fog
+scene.fog = new THREE.Fog(0x000022, 10, 50);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05); // Very dim ambient light
-scene.add(ambientLight);
-
-const moonLight = new THREE.DirectionalLight(0x88aaff, 0.2); // Moonlight effect
-moonLight.position.set(10, 20, -10);
+// Moonlight
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.6); // Adjusted intensity
+moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
+moonLight.shadow.mapSize.width = 2048; // Enhanced shadow resolution
+moonLight.shadow.mapSize.height = 2048;
+moonLight.shadow.camera.near = 1;
+moonLight.shadow.camera.far = 50;
 scene.add(moonLight);
 
-// Add Fireflies
-const fireflies = [];
-const fireflyGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-const fireflyMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
-for (let i = 0; i < 100; i++) {
-  const firefly = new THREE.Mesh(fireflyGeometry, fireflyMaterial);
-  firefly.position.set(Math.random() * 40 - 20, Math.random() * 4 + 2, Math.random() * 40 - 20);
-  fireflies.push(firefly);
-  scene.add(firefly);
-}
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+scene.add(ambientLight);
 
-// Add Trees (simple cone shapes with trunks)
-const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 }); // Dark green for leaves
-const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x4b2a0e }); // Brown for trunks
+// Trees
+const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2b2b2b });
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 });
 
-for (let i = 0; i < 5; i++) {
-  // Tree trunk
+for (let i = 0; i < 50; i++) {
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.3, 4),
-    trunkMaterial
-  );
-  trunk.position.set(Math.random() * 40 - 20, 2, Math.random() * 40 - 20);
-  trunk.castShadow = true;
-  scene.add(trunk);
-
-  // Tree leaves (cone)
-  const leaves = new THREE.Mesh(
-    new THREE.ConeGeometry(3, 6, 8),
+    new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
     treeMaterial
   );
-  leaves.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
-  leaves.castShadow = true;
-  scene.add(leaves);
+  trunk.position.set(Math.random() * 40 - 20, 3, Math.random() * 40 - 20);
+  trunk.castShadow = true;
+
+  const foliage = new THREE.Mesh(
+    new THREE.SphereGeometry(2, 16, 16),
+    leafMaterial
+  );
+  foliage.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
+  foliage.castShadow = true;
+
+  scene.add(trunk);
+  scene.add(foliage);
 }
 
-// Add Pulsing Orb
-const orbGeometry = new THREE.SphereGeometry(2, 32, 32);
-const orbMaterial = new THREE.MeshBasicMaterial({ color: 0xff2200, emissive: 0xff2200 });
-const orb = new THREE.Mesh(orbGeometry, orbMaterial);
-orb.position.set(0, 4, 0);
+// Mushrooms
+const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+for (let i = 0; i < 50; i++) {
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.2, 0.5),
+    mushroomStemMaterial
+  );
+  const cap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.4, 0.3, 8),
+    mushroomCapMaterial
+  );
+  const x = Math.random() * 40 - 20;
+  const z = Math.random() * 40 - 20;
+  stem.position.set(x, 0.25, z);
+  cap.position.set(x, 0.55, z);
+
+  stem.castShadow = true;
+  cap.castShadow = true;
+
+  scene.add(stem);
+  scene.add(cap);
+}
+
+// Fireflies
+const fireflies = [];
+for (let i = 0; i < 50; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 2, 7);
+  firefly.position.set(
+    Math.random() * 40 - 20,
+    Math.random() * 5 + 1,
+    Math.random() * 40 - 20
+  );
+  scene.add(firefly);
+  fireflies.push({
+    light: firefly,
+    velocity: new THREE.Vector3(
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02
+    ),
+  });
+}
+
+// Shrine
+const shrine = new THREE.Group();
+const base = new THREE.Mesh(
+  new THREE.BoxGeometry(3, 1, 3),
+  new THREE.MeshStandardMaterial({ color: 0x4b4b4b })
+);
+base.position.y = 0.5;
+base.castShadow = true;
+
+const orb = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 16, 16),
+  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2.5 }) // Brighter emissive intensity
+);
+orb.position.y = 2;
 orb.castShadow = true;
-scene.add(orb);
+
+shrine.add(base);
+shrine.add(orb);
+scene.add(shrine);
 
 // Camera Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Add some smoothing
+controls.enableDamping = true;
 controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
 
 // Animation
 const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update firefly positions for random movement
-  fireflies.forEach(firefly => {
-    firefly.position.y += Math.sin(elapsedTime + firefly.position.x + firefly.position.z) * 0.1;
+  // Update fireflies
+  fireflies.forEach(({ light, velocity }) => {
+    light.position.add(velocity);
+    if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
+    if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
+    if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
   });
 
-  // Update orb pulsing
-  const intensity = Math.sin(elapsedTime * 2) * 0.5 + 0.5;
-  orb.material.emissive.setScalar(intensity);
+  // Animate shrine orb glow
+  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2.5; // Pulsing brighter glow
 
-  // Update controls
-  controls.update(); // Update the controls
-
+  controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
 
 animate();
 
-// Handle resizing
+// Handle window resize
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
