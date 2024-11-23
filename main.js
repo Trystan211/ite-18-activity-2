@@ -85,7 +85,7 @@ for (let i = 0; i < 50; i++) {
 // Fireflies
 const fireflies = [];
 for (let i = 0; i < 50; i++) {
-  const firefly = new THREE.PointLight(0xffff00, 2, 7);
+  const firefly = new THREE.PointLight(0xffff00, 3, 7); // Increased intensity for brightness
   firefly.position.set(
     Math.random() * 40 - 20,
     Math.random() * 5 + 1,
@@ -95,9 +95,9 @@ for (let i = 0; i < 50; i++) {
   fireflies.push({
     light: firefly,
     velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.02,
-      (Math.random() - 0.5) * 0.02,
-      (Math.random() - 0.5) * 0.02
+      (Math.random() - 0.5) * 0.04, // Increased speed
+      (Math.random() - 0.5) * 0.04, // Increased speed
+      (Math.random() - 0.5) * 0.04  // Increased speed
     ),
   });
 }
@@ -135,9 +135,13 @@ const animate = () => {
   // Update fireflies
   fireflies.forEach(({ light, velocity }) => {
     light.position.add(velocity);
+    // Keep fireflies within bounds
     if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
     if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
     if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
+
+    // Randomly adjust brightness for added variation in shine
+    light.intensity = 3 + Math.sin(elapsedTime + light.position.x) * 1; // Make them shine brighter and with some flickering effect
   });
 
   // Animate shrine orb glow
