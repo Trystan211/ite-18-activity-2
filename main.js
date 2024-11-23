@@ -19,14 +19,14 @@ const ground = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
 );
 ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true; // Ground receives shadows
+ground.receiveShadow = true;
 scene.add(ground);
 
 // Fog
 scene.fog = new THREE.Fog(0x000022, 10, 50);
 
 // Moonlight
-const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4);
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); // Reset moonlight intensity
 moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
 scene.add(moonLight);
@@ -55,22 +55,21 @@ for (let i = 0; i < 50; i++) {
   const x = Math.random() * 40 - 20;
   const z = Math.random() * 40 - 20;
   
+  // Check if the tree position is within the restricted area around the shrine
   if (!isPositionInShrineArea(x, 3, z)) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
       treeMaterial
     );
     trunk.position.set(x, 3, z);
-    trunk.castShadow = true;  // Trunk casts shadow
-    trunk.receiveShadow = true; // Trunk receives shadow
+    trunk.castShadow = true;
 
     const foliage = new THREE.Mesh(
       new THREE.SphereGeometry(2, 16, 16),
       leafMaterial
     );
     foliage.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
-    foliage.castShadow = true; // Foliage casts shadow
-    foliage.receiveShadow = true; // Foliage receives shadow
+    foliage.castShadow = true;
 
     scene.add(trunk);
     scene.add(foliage);
@@ -85,6 +84,7 @@ for (let i = 0; i < 50; i++) {
   const x = Math.random() * 40 - 20;
   const z = Math.random() * 40 - 20;
   
+  // Check if the mushroom position is within the restricted area around the shrine
   if (!isPositionInShrineArea(x, 0.25, z)) {
     const stem = new THREE.Mesh(
       new THREE.CylinderGeometry(0.1, 0.2, 0.5),
@@ -97,10 +97,8 @@ for (let i = 0; i < 50; i++) {
     stem.position.set(x, 0.25, z);
     cap.position.set(x, 0.55, z);
 
-    stem.castShadow = true; // Stem casts shadow
-    stem.receiveShadow = true; // Stem receives shadow
-    cap.castShadow = true; // Cap casts shadow
-    cap.receiveShadow = true; // Cap receives shadow
+    stem.castShadow = true;
+    cap.castShadow = true;
 
     scene.add(stem);
     scene.add(cap);
@@ -134,16 +132,14 @@ const base = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0x4b4b4b })
 );
 base.position.y = 0.5;
-base.castShadow = true;  // Base casts shadow
-base.receiveShadow = true; // Base receives shadow
+base.castShadow = true;
 
 const orb = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2 })
+  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2 }) // Increased emissiveIntensity
 );
 orb.position.y = 2;
-orb.castShadow = true; // Orb casts shadow
-orb.receiveShadow = true; // Orb receives shadow
+orb.castShadow = true;
 
 shrine.add(base);
 shrine.add(orb);
