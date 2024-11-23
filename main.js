@@ -1,7 +1,8 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000); // Black background for nighttime
-
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -12,32 +13,32 @@ camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true; // Enable shadows
 document.body.appendChild(renderer.domElement);
 
-// Add dark grass-like floor
+// Darker ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Dark green for nighttime
+  new THREE.MeshStandardMaterial({ color: 0x003300 }) // Very dark green
 );
 ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
 scene.add(ground);
 
-// Adjusted Fog for Spooky Night
-scene.fog = new THREE.Fog(0x111122, 5, 30); // Dark bluish-gray fog
+// Spooky fog
+scene.fog = new THREE.Fog(0x000000, 5, 50); // Start close and fade to black
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05); // Very dim ambient light
+const ambientLight = new THREE.AmbientLight(0x333366, 0.3); // Low intensity and cool tint
 scene.add(ambientLight);
 
-const moonLight = new THREE.DirectionalLight(0x88aaff, 0.2); // Moonlight effect
-moonLight.position.set(10, 20, -10);
-moonLight.castShadow = true;
-scene.add(moonLight);
+const directionalLight = new THREE.DirectionalLight(0x666666, 0.5); // Reduced intensity
+directionalLight.position.set(10, 15, 10);
+scene.add(directionalLight);
 
 // Add tombstones
-const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x111111 });
+const tombstoneMaterial = new THREE.MeshStandardMaterial({
+  color: 0x808080,
+  emissive: 0x333333,
+});
 for (let i = 0; i < 50; i++) {
   const tombstone = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 1, 0.2),
@@ -49,29 +50,26 @@ for (let i = 0; i < 50; i++) {
     Math.random() * 20 - 10
   );
   tombstone.rotation.y = Math.random() * Math.PI;
-  tombstone.castShadow = true;
   scene.add(tombstone);
 }
 
-// Spooky Bouncing Lights
+// Bouncing Lights
 const bouncingLights = [];
-const eerieColors = [0x00ff88, 0xff2200, 0x2200ff];
 for (let i = 0; i < 5; i++) {
-  const lightColor = eerieColors[i % eerieColors.length];
-  const bouncingLight = new THREE.PointLight(lightColor, 2, 15); // Spooky glow
+  const lightColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+  const bouncingLight = new THREE.PointLight(lightColor, 3, 20); // Stronger intensity
   bouncingLight.position.set(
     Math.random() * 10 - 5,
     Math.random() * 5 + 2,
     Math.random() * 10 - 5
   );
-  bouncingLight.castShadow = true;
   scene.add(bouncingLight);
   bouncingLights.push({
     light: bouncingLight,
     velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05
+      (Math.random() - 0.5) * 0.1,
+      (Math.random() - 0.5) * 0.1,
+      (Math.random() - 0.5) * 0.1
     ),
   });
 }
@@ -82,32 +80,30 @@ const house = new THREE.Group();
 // Walls
 const walls = new THREE.Mesh(
   new THREE.BoxGeometry(4, 3, 4),
-  new THREE.MeshStandardMaterial({ color: 0x5a2f2f })
+  new THREE.MeshStandardMaterial({ color: 0x5a3e36 })
 );
 walls.position.y = 1.5;
-walls.castShadow = true;
 house.add(walls);
 
 // Roof
 const roof = new THREE.Mesh(
   new THREE.ConeGeometry(3.5, 1, 4),
-  new THREE.MeshStandardMaterial({ color: 0x4b0000 })
+  new THREE.MeshStandardMaterial({ color: 0x8b0000 })
 );
-roof.position.y = 3.5;
+roof.position.y = 3.5; // Corrected height
 roof.rotation.y = Math.PI / 4;
-roof.castShadow = true;
 house.add(roof);
 
 // Door
 const door = new THREE.Mesh(
   new THREE.PlaneGeometry(1.5, 2),
-  new THREE.MeshStandardMaterial({ color: 0x3c2f2f })
+  new THREE.MeshStandardMaterial({ color: 0x2b1f1f })
 );
 door.position.set(0, 1, 2.01);
 house.add(door);
 
 // Bushes
-const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 });
+const bushMaterial = new THREE.MeshStandardMaterial({ color: 0x1a6628 });
 const bushGeometry = new THREE.SphereGeometry(0.5, 16, 16);
 const bushes = [
   [1.5, 0.3, 2.5],
@@ -117,9 +113,7 @@ const bushes = [
 ];
 bushes.forEach(([x, y, z]) => {
   const bush = new THREE.Mesh(bushGeometry, bushMaterial);
-  bush.scale.set(1, 1, 1);
   bush.position.set(x, y, z);
-  bush.castShadow = true;
   house.add(bush);
 });
 
@@ -136,6 +130,9 @@ const animate = () => {
     if (light.position.y < 0.5 || light.position.y > 5) velocity.y *= -1;
     if (light.position.x < -10 || light.position.x > 10) velocity.x *= -1;
     if (light.position.z < -10 || light.position.z > 10) velocity.z *= -1;
+
+    // Add flicker effect
+    light.intensity = 1 + Math.sin(elapsedTime * Math.random()) * 0.5;
   });
 
   renderer.render(scene, camera);
