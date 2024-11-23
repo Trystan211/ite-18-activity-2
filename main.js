@@ -135,17 +135,13 @@ const animate = () => {
   // Update fireflies
   fireflies.forEach(({ light, velocity }) => {
     light.position.add(velocity);
-    // Keep fireflies within bounds
     if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
     if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
     if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
-
-    // Randomly adjust brightness for added variation in shine
-    light.intensity = 3 + Math.sin(elapsedTime + light.position.x) * 1; // Make them shine brighter and with some flickering effect
   });
 
-  // Animate shrine orb glow
-  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2; // Brighter base glow
+  // Animate shrine orb glow and pulse
+  orb.material.emissiveIntensity = Math.sin(elapsedTime * 2) * 0.8 + 2; // Pulsing effect with oscillating intensity
 
   controls.update();
   renderer.render(scene, camera);
@@ -153,6 +149,7 @@ const animate = () => {
 };
 
 animate();
+
 
 // Handle window resize
 window.addEventListener("resize", () => {
