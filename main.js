@@ -13,6 +13,7 @@ camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true; // Enable shadows
 document.body.appendChild(renderer.domElement);
 
 // Add green grass-like floor
@@ -21,10 +22,11 @@ const ground = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0x00aa00 })
 );
 ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true; // Ground receives shadows
 scene.add(ground);
 
 // Adjusted Fog
-scene.fog = new THREE.Fog(0x000000, 30, 100); // Start fog further and increase its range
+scene.fog = new THREE.Fog(0x000000, 10, 50); // Adjusted fog start and end values
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased intensity
@@ -32,21 +34,28 @@ scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
 directionalLight.position.set(10, 15, 10);
+directionalLight.castShadow = true; // Enable shadows
 scene.add(directionalLight);
 
 // Add tombstones
 const tombstoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, emissive: 0x333333 }); // Added emissive
+const placedPositions = [];
 for (let i = 0; i < 50; i++) {
+  let x, z, distance;
+  do {
+    x = Math.random() * 20 - 10;
+    z = Math.random() * 20 - 10;
+    distance = placedPositions.some(([px, pz]) => Math.hypot(x - px, z - pz) < 1);
+  } while (distance); // Prevent overlap
+  placedPositions.push([x, z]);
+
   const tombstone = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 1, 0.2),
     tombstoneMaterial
   );
-  tombstone.position.set(
-    Math.random() * 20 - 10, // Random X position
-    0.5,
-    Math.random() * 20 - 10 // Random Z position
-  );
+  tombstone.position.set(x, 0.5, z);
   tombstone.rotation.y = Math.random() * Math.PI;
+  tombstone.castShadow = true; // Enable shadows
   scene.add(tombstone);
 }
 
@@ -60,6 +69,7 @@ for (let i = 0; i < 5; i++) {
     Math.random() * 5 + 2,
     Math.random() * 10 - 5
   );
+  bouncingLight.castShadow = true; // Enable shadow casting
   scene.add(bouncingLight);
   bouncingLights.push({
     light: bouncingLight,
@@ -80,6 +90,7 @@ const walls = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0xb35f45 })
 );
 walls.position.y = 1.5;
+walls.castShadow = true;
 house.add(walls);
 
 // Roof
@@ -89,12 +100,13 @@ const roof = new THREE.Mesh(
 );
 roof.position.y = 4;
 roof.rotation.y = Math.PI / 4;
+roof.castShadow = true;
 house.add(roof);
 
 // Door
 const door = new THREE.Mesh(
   new THREE.PlaneGeometry(1.5, 2),
-  new THREE.MeshStandardMaterial({ color: 0x3c2f2f })
+  new THREE.MeshStandardMaterial({ color: 0x3c2f2f, side: THREE.DoubleSide }) // Added side
 );
 door.position.set(0, 1, 2.01);
 house.add(door);
@@ -110,12 +122,16 @@ const bushes = [
 ];
 bushes.forEach(([x, y, z]) => {
   const bush = new THREE.Mesh(bushGeometry, bushMaterial);
-  bush.scale.set(1, 1, 1);
+  bush.scale.setScalar(0.8 + Math.random() * 0.4); // Random scaling
   bush.position.set(x, y, z);
+  bush.castShadow = true; // Enable shadow casting
   house.add(bush);
 });
 
 scene.add(house);
+
+// OrbitControls
+const controls = new OrbitControls(camera, renderer.domElement);
 
 // Animation
 const clock = new THREE.Clock();
@@ -142,4 +158,3 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
