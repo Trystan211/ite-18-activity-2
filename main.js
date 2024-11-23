@@ -84,8 +84,8 @@ for (let i = 0; i < 50; i++) {
 
 // Fireflies
 const fireflies = [];
-for (let i = 0; i < 50; i++) {
-  const firefly = new THREE.PointLight(0xffff00, 3.5, 7); // Increased intensity for brightness
+for (let i = 0; i < 20; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 3, 7); // Increased intensity for brightness
   firefly.position.set(
     Math.random() * 40 - 20,
     Math.random() * 5 + 1,
@@ -95,9 +95,9 @@ for (let i = 0; i < 50; i++) {
   fireflies.push({
     light: firefly,
     velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.06, // Increased speed
-      (Math.random() - 0.5) * 0.06, // Increased speed
-      (Math.random() - 0.5) * 0.06  // Increased speed
+      (Math.random() - 0.5) * 0.05, // Increased speed
+      (Math.random() - 0.5) * 0.05, // Increased speed
+      (Math.random() - 0.5) * 0.05 // Increased speed
     ),
   });
 }
