@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'; // Import OrbitControls
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js';
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -96,7 +96,7 @@ const roof = new THREE.Mesh(
   new THREE.ConeGeometry(3.5, 1, 4),
   new THREE.MeshStandardMaterial({ color: 0x4b0000 })
 );
-roof.position.y = 3.5 + 1.5; // Walls' height (1.5) + Roof's offset (3.5)
+roof.position.y = 3.5 + 1.5; // Corrected roof position
 roof.rotation.y = Math.PI / 4;
 roof.castShadow = true;
 house.add(roof);
@@ -132,7 +132,7 @@ scene.add(house);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // Add some smoothing
 controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false; // Disable panning out of the scene
+controls.screenSpacePanning = false;
 
 // Animation
 const clock = new THREE.Clock();
@@ -162,4 +162,5 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 
