@@ -141,11 +141,11 @@ const animate = () => {
   });
 
   // Animate shrine orb glow and pulse from no light to full light
-  const intensity = Math.abs(Math.sin(elapsedTime * 2)); // Pulsing effect from no light to full light
-  orb.material.emissiveIntensity = intensity;
+  const intensity = Math.abs(Math.sin(elapsedTime * 0.5)); // Pulsing effect from no light to full light
+  orb.material.emissiveIntensity = intensity * 3;
   
   // Adjust the emissive color to fade in/out
-  orb.material.emissive = new THREE.Color(0x00ff88).multiplyScalar(intensity); // Adjust color based on intensity
+  orb.material.emissive = new THREE.Color(0x00ff88).multiplyScalar(intensity * 3); // Adjust color based on intensity
 
   controls.update();
   renderer.render(scene, camera);
