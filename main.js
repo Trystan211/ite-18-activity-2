@@ -3,7 +3,7 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/exampl
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000022); // Deep blue for nighttime
+scene.background = new THREE.Color(0x000022);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
@@ -13,33 +13,33 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Ground (dark forest floor)
+// Ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x1a1a1a }) // Very dark brown
+  new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Fog for mysterious atmosphere
+// Fog
 scene.fog = new THREE.Fog(0x000022, 10, 50);
 
-// Moonlight filtering through trees
-const moonLight = new THREE.DirectionalLight(0x6666ff, 0.3);
+// Moonlight
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); // Reset moonlight intensity
 moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
 scene.add(moonLight);
 
-// Ambient light for soft glow
-const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Soft, dim light
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
 scene.add(ambientLight);
 
 // Trees
-const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2b2b2b }); // Dark bark
-const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 }); // Dark green leaves
+const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2b2b2b });
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x003300 });
 
-for (let i = 0; i < 30; i++) {
+for (let i = 0; i < 50; i++) {
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
     treeMaterial
@@ -58,10 +58,10 @@ for (let i = 0; i < 30; i++) {
   scene.add(foliage);
 }
 
-// Glowing mushrooms
+// Mushrooms
 const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
 const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   const stem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.2, 0.5),
     mushroomStemMaterial
@@ -84,12 +84,12 @@ for (let i = 0; i < 20; i++) {
 
 // Fireflies
 const fireflies = [];
-for (let i = 0; i < 15; i++) {
-  const firefly = new THREE.PointLight(0xffff00, 1, 5);
+for (let i = 0; i < 50; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 2, 7);
   firefly.position.set(
-    Math.random() * 20 - 10,
+    Math.random() * 40 - 20,
     Math.random() * 5 + 1,
-    Math.random() * 20 - 10
+    Math.random() * 40 - 20
   );
   scene.add(firefly);
   fireflies.push({
@@ -102,7 +102,7 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
-// Magical Shrine
+// Shrine
 const shrine = new THREE.Group();
 const base = new THREE.Mesh(
   new THREE.BoxGeometry(3, 1, 3),
@@ -113,7 +113,7 @@ base.castShadow = true;
 
 const orb = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ emissive: 0x00ff88 })
+  new THREE.MeshStandardMaterial({ emissive: 0x00ff88, emissiveIntensity: 2 }) // Increased emissiveIntensity
 );
 orb.position.y = 2;
 orb.castShadow = true;
@@ -141,7 +141,7 @@ const animate = () => {
   });
 
   // Animate shrine orb glow
-  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.5 + 0.5;
+  orb.material.emissiveIntensity = Math.sin(elapsedTime * 3) * 0.8 + 2; // Brighter base glow
 
   controls.update();
   renderer.render(scene, camera);
@@ -156,4 +156,5 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 
