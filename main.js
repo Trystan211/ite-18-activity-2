@@ -140,8 +140,8 @@ const animate = () => {
     if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
   });
 
-  // Animate shrine orb glow and pulse
-  orb.material.emissiveIntensity = Math.sin(elapsedTime * 2) * 0.8 + 2; // Pulsing effect with oscillating intensity
+  // Animate shrine orb glow and pulse from no light to full light
+  orb.material.emissiveIntensity = Math.abs(Math.sin(elapsedTime * 2)); // Pulsing effect from no light to full light
 
   controls.update();
   renderer.render(scene, camera);
@@ -149,7 +149,6 @@ const animate = () => {
 };
 
 animate();
-
 
 // Handle window resize
 window.addEventListener("resize", () => {
