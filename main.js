@@ -141,7 +141,7 @@ const animate = () => {
   });
 
   // Animate shrine orb glow and pulse from no light to full light
-  const intensity = Math.abs(Math.sin(elapsedTime * 0.5)); // Pulsing effect from no light to full light
+  const intensity = Math.abs(Math.sin(elapsedTime * 1)); // Pulsing effect from no light to full light
   orb.material.emissiveIntensity = intensity * 3;
   
   // Adjust the emissive color to fade in/out
